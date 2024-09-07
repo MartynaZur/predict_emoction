@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emocje z nagrania</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f0f8ff;
+            color: #333;
+        }
+
+        h1 {
+            color: #4caf50;
+        }
+
+        button {
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 10px 0;
+            cursor: pointer;
+            border-radius: 10px;
+        }
+
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        audio {
+            margin: 20px 0;
+        }
+
+        .emotion-result {
+            font-size: 20px;
+            margin-top: 20px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <h1>Rozpoznawanie emocji w głosie</h1>
+
+    <button id="recordButton">Rozpocznij nagrywanie</button>
+    <button id="stopButton" disabled>Zatrzymaj nagrywanie</button>
+    <button id="restartButton" disabled>Restart</button>
+
+    <audio id="audioPlayback" controls hidden></audio>
+
+    <div id="emotionResult" class="emotion-result"></div>
+
+    <script>
+        let chunks = [];
+        let mediaRecorder;
+        const recordButton = document.getElementById("recordButton");
+        const stopButton = document.getElementById("stopButton");
+        const restartButton = document.getElementById("restartButton");
+        const audioPlayback = document.getElementById("audioPlayback");
+        const emotionResult = document.getElementById("emotionResult");
+
+        // Rozpoczynanie nagrywania
+        recordButton.addEventListener("click", () => {
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(stream => {
+                    mediaRecorder = new MediaRecorder(stream);
+                    mediaRecorder.start();
+
+                    mediaRecorder.ondataavailable = event => {
+                        chunks.push(event.data);
+                    };
+
+                    mediaRecorder.onstop = () => {
+                        const blob = new Blob(chunks, { 'type': 'audio/wav' });
+                        chunks = [];
+
+                        const audioURL = URL.createObjectURL(blob);
+                        audioPlayback.src = audioURL;
+                        audioPlayback.hidden = false;
+
+                        // Wysyłanie nagrania do serwera
+                        sendAudioToServer(blob);
+                    };
+
+                    recordButton.disabled = true;
+                    stopButton.disabled = false;
+                    restartButton.disabled = true;
+
+                    console.log('Rozpoczęto nagrywanie');
+                })
+                .catch(error => {
+                    console.error('Error accessing media devices.', error);
+                });
+        });
+
+        // Zatrzymywanie nagrywania
+        stopButton.addEventListener("click", () => {
+            if (mediaRecorder) {
+                mediaRecorder.stop();
+                console.log('Nagrywanie zatrzymane');
+            }
+            recordButton.disabled = false;
+            stopButton.disabled = true;
+            restartButton.disabled = false;
+        });
+
+        // Restartowanie strony
+        restartButton.addEventListener("click", () => {
+            location.reload();
+        });
+
+        // Wysyłanie pliku audio do backendu i otrzymywanie odpowiedzi
+        function sendAudioToServer(audioBlob) {
+            console.log('Wysyłanie pliku audio...');
+            const formData = new FormData();
+            formData.append('audio_data', audioBlob, 'user_recording.wav');
+
+            fetch('http://127.0.0.1:5000/predict-emotion', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                console.log('Odpowiedź z serwera:', response);
+                return response.json();
+            })
+            .then(data => {
+                console.log('Dane z serwera:', data);
+                if (data.emotion) {
+                    emotionResult.innerHTML = `Przewidywana emocja: <strong>${data.emotion}</strong>`;
+                } else {
+                    emotionResult.innerHTML = "Nie udało się przewidzieć emocji.";
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                emotionResult.textContent = "Wystąpił błąd podczas przewidywania emocji.";
+            });
+        }
+    </script>
+</body>
+</html>

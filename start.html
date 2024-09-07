@@ -8,17 +8,19 @@
         body {
             font-family: Arial, sans-serif;
             text-align: center;
-            background-color: #f0f8ff;
-            color: #333;
+            background-image: url('tlo.png');
+            background-size: cover;
+            background-position: center;
+            color: #ffeb3b; /* Żółty tekst */
         }
 
         h1 {
-            color: #4caf50;
+            color: #ffeb3b; /* Żółty */
         }
 
         button {
-            background-color: #4caf50;
-            color: white;
+            background-color: #90caf9; /* Pastelowy niebieski */
+            color: #333; /* Ciemniejszy kolor tekstu */
             border: none;
             padding: 15px 30px;
             text-align: center;
@@ -42,7 +44,7 @@
         .emotion-result {
             font-size: 20px;
             margin-top: 20px;
-            color: #333;
+            color: #ffeb3b; /* Żółty */
         }
     </style>
 </head>
@@ -53,9 +55,10 @@
     <button id="stopButton" disabled>Zatrzymaj nagrywanie</button>
     <button id="restartButton" disabled>Restart</button>
 
-    <audio id="audioPlayback" controls hidden></audio>
-
     <div id="emotionResult" class="emotion-result"></div>
+    
+    <!-- Element audio przeniesiony pod wynik -->
+    <audio id="audioPlayback" controls hidden></audio>
 
     <script>
         let chunks = [];

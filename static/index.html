@@ -6,18 +6,22 @@
     <title>Emocje z nagrania</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Arial Black', sans-serif;
             text-align: center;
-            background-image: url('tlo.png');
-            background-size: cover;
-            background-position: center;
-            color: #ffeb3b; /* Żółty tekst */
+            background-image: url('Tlo_3.png');
+            background-size: cover; /* Tło wypełnia całą stronę */
+            background-repeat: no-repeat; /* Tło nie powtarza się */
+            background-attachment: fixed; /* Tło jest przypięte do widoku */
+            background-position: center; /* Tło jest wyśrodkowane */
+            color: #FFAF05; /* Żółty tekst */
+            min-height: 100vh; /* Ustawia minimalną wysokość na 100% wysokości widoku */
+            margin: 0; /* Usuwa domyślne marginesy */
         }
-
+    
         h1 {
-            color: #ffeb3b; /* Żółty */
+            color: #FFAF05; /* Żółty */
         }
-
+    
         button {
             background-color: #90caf9; /* Pastelowy niebieski */
             color: #333; /* Ciemniejszy kolor tekstu */
@@ -31,22 +35,22 @@
             cursor: pointer;
             border-radius: 10px;
         }
-
+    
         button:disabled {
             background-color: #ccc;
             cursor: not-allowed;
         }
-
+    
         audio {
             margin: 20px 0;
         }
-
+    
         .emotion-result {
             font-size: 20px;
             margin-top: 20px;
-            color: #ffeb3b; /* Żółty */
+            color: #FFAF05; /* Żółty */
         }
-    </style>
+    </style>    
 </head>
 <body>
     <h1>Rozpoznawanie emocji w głosie</h1>
@@ -57,7 +61,7 @@
 
     <div id="emotionResult" class="emotion-result"></div>
     
-    <!-- Element audio przeniesiony pod wynik -->
+    <!-- Element audio -->
     <audio id="audioPlayback" controls hidden></audio>
 
     <script>
@@ -99,7 +103,7 @@
                     console.log('Rozpoczęto nagrywanie');
                 })
                 .catch(error => {
-                    console.error('Error accessing media devices.', error);
+                    console.error('Błąd podczas uzyskiwania dostępu do urządzenia.', error);
                 });
         });
 
@@ -130,7 +134,9 @@
                 body: formData
             })
             .then(response => {
-                console.log('Odpowiedź z serwera:', response);
+                if (!response.ok) {
+                    throw new Error("Serwer zwrócił błąd");
+                }
                 return response.json();
             })
             .then(data => {
@@ -142,7 +148,7 @@
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
+                console.error('Błąd:', error);
                 emotionResult.textContent = "Wystąpił błąd podczas przewidywania emocji.";
             });
         }

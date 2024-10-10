@@ -12,6 +12,7 @@ CORS(app)  # Dodaj CORS
 # Wczytanie modelu (upewnij się, że ścieżka do modelu jest poprawna)
 model = joblib.load("D:\\noc_naukowców\\emotion_recognition_model.joblib")
 
+
 @app.route('/predict-emotion', methods=['POST'])
 def predict_emotion():
     try:
